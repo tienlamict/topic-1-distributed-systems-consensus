@@ -1,5 +1,5 @@
 # Topic 1 — Nền tảng Distributed Systems & Consensus
-## Tài liệu tổng hợp từ project knowledge (v2 — hoàn thiện)
+## Tài liệu tổng hợp từ project knowledge (v2.1 — đã rà soát & hiệu đính)
 
 > **Phạm vi:** Tổng hợp các nội dung liên quan đến consensus, strong/eventual consistency, Redis failover voting, và các trade-off distributed systems làm nền tảng cho phần khảo sát Kubernetes Operator cho Redis Cluster.
 >
@@ -55,7 +55,7 @@ Kết quả: các server xuất hiện như một state machine đơn, highly re
 
 Raft là consensus algorithm để quản lý replicated log. Tương đương (multi-)Paxos về correctness và efficiency, nhưng **cấu trúc khác với Paxos** — làm cho Raft dễ hiểu hơn và là foundation tốt hơn để xây dựng hệ thống thực tế. [03_1_raft.pdf, Abstract]
 
-**Đặc trưng novel của Raft so với các thuật toán khác (nổi bật so với Viewstamped Replication):** [03_1_raft.pdf, §1]
+Raft tương đồng nhiều mặt với các thuật toán consensus hiện có (gần nhất là **Viewstamped Replication** của Oki & Liskov), nhưng có một số **đặc trưng novel** so với các thuật toán consensus nói chung: [03_1_raft.pdf, §1]
 
 - **Strong leader**: log entries chỉ flow từ leader sang các server khác. Điều này đơn giản hoá quản lý replicated log và làm Raft dễ hiểu hơn.
 - **Leader election**: dùng **randomized timers** để elect leader. Chỉ thêm một ít mechanism vào heartbeat vốn đã bắt buộc cho mọi consensus algorithm.
@@ -127,7 +127,7 @@ Có **hai loại epoch:**
 | Loại | Scope | Khi nào tăng |
 |------|-------|--------------|
 | `currentEpoch` | Global cho cluster | Khi nhận packet với epoch lớn hơn → update theo. Eventually mọi node agree về largest currentEpoch. |
-| `configEpoch` | Gắn với từng master | Tăng khi có replica promotion (election). Mỗi master advertise configEpoch trong ping/pong cùng với bitmap slots nó serve. |
+| `configEpoch` | Gắn với từng master | Được cấp giá trị mới chủ yếu khi replica promotion (election) thành công; ngoài ra còn được sinh qua *configEpoch conflicts resolution algorithm* và lan truyền/cập nhật qua UPDATE message. Mỗi master advertise configEpoch trong ping/pong cùng với bitmap slots nó serve. |
 
 **Quan trọng:** [03_2_Redis_cluster_specification.md]
 - Khi replica win election → obtains new unique incremental `configEpoch` cao hơn mọi master hiện có.
@@ -163,7 +163,7 @@ Không trực tiếp là consensus, nhưng quan trọng cho hiểu Redis Cluster
 - Keyspace chia thành **16384 slots** — giới hạn cluster max 16384 master nodes (khuyến nghị thực tế ~1000 nodes).
 - `HASH_SLOT = CRC16(key) mod 16384`.
 - Mỗi master node serve một subset trong 16384 slots.
-- Hash tag `{...}` ép key có cùng prefix hash vào cùng slot → enable multi-key ops.
+- **Hash tag**: nếu key chứa pattern `{...}`, chỉ substring nằm giữa `{` và `}` (theo quy tắc occurrence đầu tiên) được hash → các key có cùng hash tag rơi vào cùng slot → enable multi-key ops. Hash tag có thể nằm ở bất kỳ vị trí nào trong key (không phải prefix).
 
 ---
 
@@ -499,7 +499,7 @@ Benchmark cụ thể từ file 10: [10_Rearchitecting_Kubernetes_for_the_Edge.md
 ### 6.3. Terminology conflict nhỏ
 
 - **"Term" (Raft) vs "Epoch" (Redis)**: Redis spec thừa nhận đây là concept *tương tự* Raft term. [03_2_Redis_cluster_specification.md]
-- Raft có `lastVoteEpoch` analog với Redis master's `lastVoteEpoch`. Cùng purpose: chống double-vote trong cùng term/epoch. Terminology khác nhưng semantic giống.
+- **Chống double-vote**: Raft không có `lastVoteEpoch`. Trong Raft, mỗi server persist `currentTerm` và `votedFor` — mỗi term chỉ vote cho tối đa 1 candidate [03_1_raft.pdf, Figure 2]. Trong Redis, mỗi master có field `lastVoteEpoch`, từ chối vote nếu `currentEpoch` trong auth request không lớn hơn `lastVoteEpoch`; khi vote, `lastVoteEpoch` được update và lưu xuống disk [03_2_Redis_cluster_specification.md]. Analog đúng: Raft `votedFor` (per `currentTerm`) ↔ Redis `lastVoteEpoch` — cùng purpose chống double-vote, cơ chế lưu trữ khác nhau.
 
 ---
 
@@ -621,4 +621,4 @@ Sau khi đã có 2 nguồn lõi, các tài liệu supplementary ưu tiên thấp
 
 ---
 
-*Tài liệu này được tổng hợp trung thực từ nội dung có trong project knowledge tại thời điểm 24/04/2026. Mọi claim đều có source tag ở dạng [file_name] hoặc [file_name, §section]; các suy luận (không phải trích dẫn trực tiếp) được đánh dấu rõ.*
+*Tài liệu này được tổng hợp trung thực từ nội dung có trong project knowledge (tổng hợp 24/04/2026; rà soát & hiệu đính 09/08/2026). Mọi claim đều có source tag ở dạng [file_name] hoặc [file_name, §section]; các suy luận (không phải trích dẫn trực tiếp) được đánh dấu rõ.*
