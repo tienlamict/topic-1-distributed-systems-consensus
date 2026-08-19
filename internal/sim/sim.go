@@ -84,9 +84,9 @@ func New(seed int64) *Sim {
 	return s
 }
 
-func (s *Sim) Now() Time         { return s.now }
-func (s *Sim) Rand() *rand.Rand  { return s.rng }
-func (s *Sim) Trace() []Record   { return s.trace }
+func (s *Sim) Now() Time        { return s.now }
+func (s *Sim) Rand() *rand.Rand { return s.rng }
+func (s *Sim) Trace() []Record  { return s.trace }
 
 // After lên lịch fn chạy sau d millisecond ảo.
 func (s *Sim) After(d Time, fn func()) {

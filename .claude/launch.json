@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "raft-demo",
+      "runtimeExecutable": "go",
+      "runtimeArgs": ["run", "./cmd/consensus-demo"],
+      "port": 8080
+    }
+  ]
+}

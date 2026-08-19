@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raft — Demo trực quan | Topic 1</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">Raft Consensus <small>Topic 1 — demo trực quan</small></div>
+
+  <div class="field">
+    <label for="scenario">Kịch bản</label>
+    <select id="scenario"></select>
+  </div>
+
+  <div class="field">
+    <label for="seed">Seed</label>
+    <input type="number" id="seed" value="42" min="1" step="1">
+  </div>
+
+  <button class="primary" id="run">Chạy lại</button>
+  <span id="status" style="color:var(--muted)"></span>
+</header>
+
+<div class="blurb">
+  <span class="ref" id="ref"></span>
+  <span id="brief"></span>
+</div>
+
+<div class="params" id="params"></div>
+
+<main>
+  <div class="stage">
+    <div class="note" id="note"><span class="placeholder">Đang tải…</span></div>
+    <div id="canvas"></div>
+
+    <div class="legend">
+      <span><i style="background:var(--follower)"></i>Follower</span>
+      <span><i style="background:var(--candidate)"></i>Candidate</span>
+      <span><i style="background:var(--leader)"></i>Leader</span>
+      <span><i style="background:var(--dead)"></i>Crashed</span>
+      <span style="margin-left:8px">│</span>
+      <span><i style="background:#60a5fa"></i>RequestVote</span>
+      <span><i style="background:#a78bfa"></i>Vote reply</span>
+      <span><i style="background:#34d399"></i>AppendEntries</span>
+      <span><i style="background:#14b8a6"></i>Append reply</span>
+      <span style="margin-left:8px">│</span>
+      <span><i style="background:var(--committed);border-radius:2px"></i>Entry committed</span>
+      <span><i style="background:var(--uncommitted);border-radius:2px"></i>Chưa commit</span>
+    </div>
+
+    <div class="transport">
+      <button id="rewind" title="Về đầu">⏮</button>
+      <button id="play" title="Chạy / dừng">▶</button>
+      <button id="step" title="Nhảy tới sự kiện kế tiếp">⏭</button>
+      <input type="range" id="seek" min="0" max="1000" value="0">
+      <span class="time" id="clock">t = 0 ms</span>
+      <div class="field">
+        <label for="speed">Tốc độ</label>
+        <select id="speed" style="min-width:auto">
+          <option value="0.1">×0.1</option>
+          <option value="0.25">×0.25</option>
+          <option value="0.5">×0.5</option>
+          <option value="1" selected>×1</option>
+          <option value="2">×2</option>
+          <option value="4">×4</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="timeline"><svg id="timeline"></svg></div>
+  </div>
+
+  <aside>
+    <section id="inspector">
+      <h3>Node inspector</h3>
+      <div class="hint">Bấm vào một node trên sơ đồ để xem chi tiết state của nó.</div>
+    </section>
+
+    <section>
+      <h3>Metrics</h3>
+      <div class="kv" id="metrics"></div>
+    </section>
+
+    <section id="events">
+      <h3>Event log</h3>
+      <div id="evlist"></div>
+    </section>
+  </aside>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

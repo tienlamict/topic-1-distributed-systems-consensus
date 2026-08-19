@@ -1,6 +1,9 @@
 package sim
 
-import "sort"
+import (
+	"maps"
+	"sort"
+)
 
 // Handler nhận message đã tới nơi.
 type Handler func(from, typ string, msg any)
@@ -71,9 +74,7 @@ func (n *Network) Heal() {
 // Groups trả về ánh xạ node -> nhóm hiện tại (cho UI vẽ đường phân vùng).
 func (n *Network) Groups() map[string]int {
 	out := map[string]int{}
-	for k, v := range n.group {
-		out[k] = v
-	}
+	maps.Copy(out, n.group)
 	return out
 }
 

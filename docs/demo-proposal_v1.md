@@ -1,8 +1,13 @@
 # Đề xuất Demo trực quan — Topic 1: Distributed Systems & Consensus
 
-> **Trạng thái:** Bản đề xuất để review — **chưa viết code**.
+> **Trạng thái:** Nhánh Raft **đã làm xong** (S1–S5 + thí nghiệm định lượng §4.1) — xem [`../README.md`](../README.md) để chạy. Nhánh Redis Cluster (S7–S11), phần so sánh (S12–S14) và phụ lục Docker (P6) **chưa làm**.
 > **Nguồn lý thuyết:** [`topic-1-distributed-systems-consensus_v1.2.md`](topic-1-distributed-systems-consensus_v1.2.md)
 > **Ngày:** 15/08/2026
+>
+> **Thay đổi so với bản đề xuất khi triển khai:**
+> - Bỏ WebSocket. Server chạy trọn mô phỏng rồi trả cả trace qua HTTP một lần; browser tự replay → **tua ngược được**, không chỉ tua xuôi.
+> - S6 (slider timing requirement) được gộp vào S2 dưới dạng tham số `maxLatency` thay vì làm kịch bản riêng.
+> - S4 được nâng từ P1 lên làm luôn, vì logic election restriction vốn đã nằm trong Figure 2.
 
 ---
 
