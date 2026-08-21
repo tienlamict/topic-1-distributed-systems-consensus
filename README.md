@@ -37,7 +37,8 @@ Chạy thí nghiệm định lượng §4.1, xuất CSV vào `experiments/`.
 | Bấm vào node | Xem toàn bộ state của node đó ở panel phải |
 
 Vòng cung quanh mỗi node là election timeout đang đếm ngược — nhìn nó là hiểu ngay randomized timeout làm gì. Dải ô vuông dưới node là log: **xanh = đã commit**, **xám = chưa**, số bên trong là term của entry.
-
+- election - cuộc bầu chọn
+- cơ chế randomized timeout - mỗi một thành viên có một khoảng thời gian timeout ngẫu nhiên khi không nhận đc heartbeat từ leader.
 ## Các kịch bản
 
 | ID | Nội dung | § tài liệu |
