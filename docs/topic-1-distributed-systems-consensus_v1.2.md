@@ -83,12 +83,13 @@ Raft decompose consensus thành **3 sub-problem tương đối độc lập**: [
 - **Follower**: passive, chỉ respond request từ leader/candidate.
 - **Candidate**: dùng để elect leader mới.
 - **Leader**: xử lý mọi client request. Nếu client contact follower, follower redirect sang leader.
+- **Terms**: Nhiệm kỳ
 
 Trong normal operation có **đúng 1 leader** và tất cả còn lại là follower.
 
 **Terms:** Raft chia thời gian thành các **term** có độ dài bất kỳ, đánh số bằng số nguyên liên tiếp. [03_1_raft.pdf, §5.1]
 
-- Mỗi term bắt đầu bằng một **election**.
+- Mỗi term bắt đầu bằng một **election - cuộc bầu chọn**.
 - Nếu candidate thắng, nó làm leader cho phần còn lại của term.
 - Nếu **split vote** → term kết thúc không có leader → term mới bắt đầu với election mới.
 - **Raft đảm bảo tối đa 1 leader trong một term** (Election Safety Property).
