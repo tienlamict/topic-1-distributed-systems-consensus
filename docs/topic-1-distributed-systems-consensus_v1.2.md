@@ -84,6 +84,9 @@ Raft decompose consensus thành **3 sub-problem tương đối độc lập**: [
 - **Candidate**: dùng để elect leader mới.
 - **Leader**: xử lý mọi client request. Nếu client contact follower, follower redirect sang leader.
 - **Terms**: Nhiệm kỳ
+- **Log replicated**: Hình dung nó như một cuốn sổ ghi chép, mỗi dòng là 1 lệnh làm thay đổi data. Giả sử có 5 máy chủ, mỗi máy giữ 1 bản sao của cuốn sổ này.
+	Nếu ta đảm bảo cả 5 cuốn sổ được đồng bộ theo đúng thứ tự thì khi mỗi máy thực hiện lần lượt lệnh thì sẽ kết thúc ở cùng 1 trạng thái data.
+	=> Bài toán consensus quy về việc giữ cho 5 cuồn sổ giống hệt nhau, kể cả khi máy chết và mạng đứt
 
 Trong normal operation có **đúng 1 leader** và tất cả còn lại là follower.
 
@@ -110,6 +113,7 @@ Trong normal operation có **đúng 1 leader** và tất cả còn lại là fol
 
 1. Client request → leader append command vào local log thành new entry.
 2. Leader gửi AppendEntries RPC song song cho mọi server.
+	- AppendEntries là 1 RPC mà leader gửi cho follower, có thể dùng làm heartbeat để duy trì quyền lực
 3. Khi entry đã được replicated an toàn (trên majority server) → leader apply entry vào state machine → return kết quả cho client.
 4. Nếu follower crash/slow hoặc packet loss → leader retry AppendEntries indefinitely (kể cả sau khi đã respond client) cho đến khi mọi follower eventually lưu mọi log entry.
 5. Log entry được **committed** khi leader đã replicate nó trên majority server.
