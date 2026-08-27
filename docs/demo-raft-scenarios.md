@@ -157,7 +157,7 @@ Tra cứu khi gặp từ lạ. Cột cuối trỏ về mục lý thuyết tươn
 
 | Thuật ngữ | Giải thích | § |
 |-----------|-----------|---|
-| **RPC** | Tin nhắn có cấu trúc gửi qua mạng, có gửi và có trả lời. | §3.1 |
+| **RPC** | Tin nhắn có cấu trúc gửi qua mạng, có gửi và có trả lời - Remote protocol call. | §3.1 |
 | **RequestVote** | *"Bầu cho tôi?"* Kèm nhiệm kỳ và thông tin dòng cuối trong sổ của mình. | §3.1.1 |
 | **AppendEntries** | *"Chép mấy dòng này."* Rỗng thì thành heartbeat. | §3.1.2 |
 | **prevLogIndex / prevLogTerm** | Leader nói: *"Trước mấy dòng tôi gửi, sổ anh phải có đúng dòng số X thuộc nhiệm kỳ Y."* Nếu follower không khớp thì từ chối — đây là cách Raft phát hiện hai cuốn sổ đã lệch nhau. | §3.1.2 |
