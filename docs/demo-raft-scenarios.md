@@ -179,10 +179,87 @@ Tra cứu khi gặp từ lạ. Cột cuối trỏ về mục lý thuyết tươn
 
 | Thuật ngữ | Giải thích |
 |-----------|-----------|
-| **seed** | Số khởi tạo bộ sinh ngẫu nhiên. **Cùng seed cho kết quả y hệt từng millisecond.** Nhờ vậy mọi mốc thời gian trong tài liệu này tái hiện được chính xác. |
+| **seed** | Số khởi tạo bộ sinh ngẫu nhiên. Cùng seed cho kết quả y hệt từng millisecond. **Giải thích đầy đủ ở mục 2.7 ngay dưới đây.** |
 | **deterministic** | Tính chất "chạy lại cho ra đúng kết quả cũ". |
 | **thời gian ảo** | Demo không dùng đồng hồ thật. 12 giây mô phỏng tính xong trong vài ms rồi phát lại. Vì thế mới tua nhanh / tua chậm / tua ngược được. |
 | **trace** | Toàn bộ nhật ký sự kiện của một lượt chạy. Server tính xong gửi cả cục sang trình duyệt. |
+
+### 2.7. Seed và tính tái lập
+
+> **Nói ngay để khỏi hiểu nhầm: seed KHÔNG phải khái niệm của Raft.** Raft thật không có thứ gì tên là seed. Đây thuần tuý là công cụ của **mô phỏng**, sinh ra để ta có thể "tua lại đúng một vũ trụ" phục vụ việc dạy học và kiểm chứng.
+
+#### Seed là gì
+
+Máy tính **không có ngẫu nhiên thật**. Cái ta gọi là "số ngẫu nhiên" thực chất là một dãy số do một công thức toán sinh ra — gọi là *pseudo-random* (giả ngẫu nhiên). Công thức đó cần một giá trị khởi đầu, và **giá trị khởi đầu đó chính là seed** (nghĩa đen: hạt giống).
+
+Đặc tính then chốt: **cùng một seed thì công thức sinh ra đúng cùng một dãy số, theo đúng thứ tự đó.**
+
+```
+seed = 42  →  175, 194, 213, 156, 290, 22, 18, 27, ...   (luôn luôn là dãy này)
+seed = 7   →  174, 231, 168, 205, 187, 15, 29, 11, ...   (luôn luôn là dãy này)
+```
+
+Dãy số nhìn thì "lộn xộn như ngẫu nhiên", nhưng nó hoàn toàn xác định — chạy lại bao nhiêu lần cũng ra y nguyên.
+
+#### Trong demo này, những gì lấy số từ dãy đó
+
+Chỉ có **hai nguồn**:
+
+| Dùng số ngẫu nhiên để làm gì | Khoảng giá trị | Ảnh hưởng tới điều gì |
+|------------------------------|----------------|----------------------|
+| **Election timeout của mỗi node** — rút một số mới mỗi lần đặt lại đồng hồ đếm ngược | [150, 300)ms | Node nào hết giờ trước, tức node nào được ứng cử trước |
+| **Độ trễ của mỗi tin nhắn** — rút một số mỗi lần gửi | 10–30ms | Phiếu bầu của ai về tới trước, heartbeat tới lúc nào |
+
+Lưu ý: demo **không** bật tính năng rớt gói ngẫu nhiên. Những tin nhắn bạn thấy biến mất giữa đường đều có nguyên nhân rõ ràng — mạng bị cắt hoặc node nhận đã chết — chứ không phải xui rủi.
+
+#### Bằng chứng — chạy thật
+
+Chạy kịch bản S1 nhiều lần với các seed khác nhau:
+
+| Seed | Node hết giờ trước | Thời hạn rút được | Ai thắng | Xong lúc |
+|------|-------------------|-------------------|----------|----------|
+| **42** | `n1` | 175ms | `n1` | **218ms** |
+| **7** | `n2` | 174ms | `n2` | **207ms** |
+| **99** | `n1` (191ms), rồi `n2` (207ms) cùng ứng cử | 191ms | `n1` | **221ms** |
+
+Chạy lại seed 42 lần thứ hai, thứ ba, thứ một trăm: vẫn **đúng 218ms**. Chạy lại seed 7: vẫn **đúng 207ms**.
+
+Trường hợp seed 99 đáng chú ý — có **hai** node cùng ứng cử vì thời hạn của chúng gần nhau (191ms và 207ms), suýt nữa thành split vote như S2, nhưng `n1` vẫn kịp gom đủ phiếu. Đây là ví dụ tốt cho thấy randomized timeout không phải phép màu tuyệt đối, nó chỉ làm cho split vote trở nên **hiếm**.
+
+#### Trong mã nguồn
+
+Cả mô phỏng dùng **đúng một** bộ sinh số duy nhất, tạo ở `internal/sim/sim.go`:
+
+```go
+s := &Sim{rng: rand.New(rand.NewSource(seed))}
+```
+
+Mọi chỗ cần ngẫu nhiên đều phải gọi qua `s.Rand()`. Không có nguồn ngẫu nhiên nào khác, không dùng đồng hồ thật, không dùng goroutine. Nhờ vậy **toàn bộ một lượt chạy là một hàm thuần tuý của seed**.
+
+#### Vì sao lại cần thứ này — ba lý do
+
+**1. Để tài liệu nói được số cụ thể.**
+Nếu mỗi lần chạy ra một kết quả khác, tôi đã không thể viết *"ở mốc 218ms `n1` thắng cử"* trong tài liệu này — bạn mở lên sẽ thấy số khác và tưởng tôi bịa. Có seed thì mọi mốc thời gian đều kiểm chứng được.
+
+**2. Để trình bày không bị hớ.**
+Bạn tập trước với seed 42, đến hôm bảo vệ gõ lại seed 42, diễn biến y hệt từng millisecond. Không có chuyện "hôm qua chạy đẹp mà hôm nay lại rơi vào tình huống khác".
+
+**3. Để test bắt được lỗi.**
+Bộ test chạy 400 lượt với 400 seed khác nhau. Khi một lượt phát hiện vi phạm safety, nó in ra số seed — và ta tái hiện lại chính xác lỗi đó bằng cách chạy lại với seed ấy. Không có tính tái lập thì gặp lỗi ngẫu nhiên coi như bó tay.
+
+#### Một hệ quả tinh tế — vì sao code có luật "không được duyệt map"
+
+Vì tất cả chỉ dùng chung một bộ sinh số, **thứ tự gọi phải cố định tuyệt đối**.
+
+Trong Go, thứ tự duyệt một `map` là **ngẫu nhiên theo thiết kế** — cố ý làm vậy để lập trình viên không lỡ phụ thuộc vào thứ tự. Nếu ở đâu đó code duyệt map để gửi tin nhắn, thì thứ tự rút số sẽ khác nhau giữa các lần chạy, và tính tái lập vỡ ngay lập tức.
+
+Đó là lý do có dòng cảnh báo in đậm ở đầu package `sim` và trong README: **luôn duyệt slice đã sắp xếp** (`n.peers`, `c.ids`), không bao giờ duyệt map ở chỗ ảnh hưởng tới thứ tự gọi. Test `TestDeterministic` tồn tại chính là để canh chừng việc này — nó chạy mỗi kịch bản hai lần và so sánh trace từng byte.
+
+#### Cách dùng khi trình bày
+
+- **Cố định seed 42** cho các buổi trình bày chính thức, vì mọi mốc thời gian trong tài liệu này đều theo seed đó.
+- **Đổi seed vài lần** khi muốn chứng minh rằng kết quả không phải do dàn xếp: thay đổi node thắng, thay đổi thời gian, nhưng **lần nào cũng có đúng một leader**. Đó là điểm cần thấy — kết quả ngẫu nhiên, nhưng tính đúng đắn thì không.
+- Nếu ai hỏi seed là gì, câu trả lời gọn: *"Số để tái lập chính xác một lượt chạy. Hệ thống thật không có nó."*
 
 ---
 
