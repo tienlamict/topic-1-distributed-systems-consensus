@@ -261,6 +261,9 @@ Trong Go, thứ tự duyệt một `map` là **ngẫu nhiên theo thiết kế**
 - **Đổi seed vài lần** khi muốn chứng minh rằng kết quả không phải do dàn xếp: thay đổi node thắng, thay đổi thời gian, nhưng **lần nào cũng có đúng một leader**. Đó là điểm cần thấy — kết quả ngẫu nhiên, nhưng tính đúng đắn thì không.
 - Nếu ai hỏi seed là gì, câu trả lời gọn: *"Số để tái lập chính xác một lượt chạy. Hệ thống thật không có nó."*
 
+- Seed database: Khởi tạo data mẫu (do ban đầu bảng chưa có dữ liệu gì)
+- Config seed nodes: Khai báo node ban đầu để một node có thể thể tìm và tham gia và Cluster
+- Set random seed: Đặt giá trị khởi tạo cho bộ sinh số ngẫu nhiên để kết quả có thể lặp lại.
 ---
 
 ## 3. Cách đọc màn hình demo
