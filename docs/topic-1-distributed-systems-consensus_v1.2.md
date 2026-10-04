@@ -18,8 +18,6 @@
 | `01`, `08` | ⭐ Gián tiếp | Redis master-slave architecture, role-based management — bổ sung context thực tiễn cho Redis consensus. |
 | Các file 02, 04-07, 09 | ❌ Không liên quan | Không có nội dung về consensus/consistency ở cấp độ lý thuyết. |
 
-**Kết luận coverage sau khi bổ sung:** ~**90%** (trước là ~40%). Giờ có thể viết đầy đủ phần lý thuyết nền tảng của luận văn.
-
 ---
 
 ## 1. Định nghĩa & Mục đích
