@@ -114,5 +114,3 @@ Cố ý **không** cài đặt: InstallSnapshot / log compaction, joint consensu
 ## Ghi chú về một quan sát ngoài dự kiến
 
 Ở S4, node bị cô lập (`n5`) liên tục hết election timeout và tăng term của nó lên rất cao. Khi mạng liền lại, term cao đó khiến leader đang hoạt động phải lùi về follower dù nó hoàn toàn khoẻ mạnh — cluster bị gián đoạn vô cớ.
-
-Đây chính là vấn đề mà **pre-vote extension** giải quyết, mục §8.2 của tài liệu lý thuyết có ghi là gap còn lại ("Paper không đề cập"). Demo tình cờ tái hiện được nó, và đây là một điểm đáng viết vào luận văn.
