@@ -55,7 +55,7 @@ Raft là consensus algorithm để quản lý replicated log. Tương đương (
 
 Raft tương đồng nhiều mặt với các thuật toán consensus hiện có (gần nhất là **Viewstamped Replication** của Oki & Liskov), nhưng có một số **đặc trưng novel** so với các thuật toán consensus nói chung: [03_1_raft.pdf, §1]
 
-- **Strong leader**: log entries chỉ flow từ leader sang các server khác. Điều này đơn giản hoá quản lý replicated log và làm Raft dễ hiểu hơn.
+- **Strong leader**: log entries chỉ flow từ leader sang các server khác. Điều này đơn giản hoá quản lý replicated log và làm Raft dễ hiểu hơn. Tại một thời điểm chỉ có 1 máy đóng vai trò là leader, các máy còn lại là follower, quyền lực tập trung chính ở leader.
 - **Leader election**: dùng **randomized timers** để elect leader. Chỉ thêm một ít mechanism vào heartbeat vốn đã bắt buộc cho mọi consensus algorithm.
 - **Membership changes**: mechanism mới gọi là **joint consensus** — majority của hai configuration khác nhau overlap trong transition. Cluster tiếp tục hoạt động normal trong khi thay đổi config.
 
